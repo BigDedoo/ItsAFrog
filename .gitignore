@@ -1,0 +1,50 @@
+# Visual Studio
+.vs/
+*.sln
+*.suo
+*.user
+*.userprefs
+*.VC.db
+*.VC.opendb
+*.opensdf
+*.sdf
+
+# JetBrains Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Unreal Engine generated folders
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Generated plugin folders
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+*.obj
+*.lib
+*.exp
+*.ilk
+
+# Unreal crash and log files
+*.log
+*.dmp
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
