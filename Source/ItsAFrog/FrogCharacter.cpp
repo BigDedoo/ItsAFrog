@@ -13,6 +13,7 @@
 #include "InputActionValue.h"
 #include "TongueAnimInstance.h"
 #include "ItsAFrog.h"
+#include "UObject/ConstructorHelpers.h"
 
 namespace
 {
@@ -32,6 +33,16 @@ namespace
 AFrogCharacter::AFrogCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> JumpActionAsset(TEXT("/Game/Input/Actions/IA_Jump.IA_Jump"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionAsset(TEXT("/Game/Input/Actions/IA_Move.IA_Move"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionAsset(TEXT("/Game/Input/Actions/IA_Look.IA_Look"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> MouseLookActionAsset(TEXT("/Game/Input/Actions/IA_MouseLook.IA_MouseLook"));
+
+	if (JumpActionAsset.Succeeded()) JumpAction = JumpActionAsset.Object;
+	if (MoveActionAsset.Succeeded()) MoveAction = MoveActionAsset.Object;
+	if (LookActionAsset.Succeeded()) LookAction = LookActionAsset.Object;
+	if (MouseLookActionAsset.Succeeded()) MouseLookAction = MouseLookActionAsset.Object;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -62,6 +73,7 @@ AFrogCharacter::AFrogCharacter()
 	TongueMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	TongueMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	TongueMesh->SetGenerateOverlapEvents(false);
+	TongueMesh->SetSimulatePhysics(false);
 	TongueMesh->SetVisibility(false, true);
 	TongueMesh->SetComponentTickEnabled(false);
 }
