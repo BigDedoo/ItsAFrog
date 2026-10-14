@@ -48,3 +48,5 @@ Desktop.ini
 *.temp
 *.bak
 *~
+# Blender backups
+*.blend1
