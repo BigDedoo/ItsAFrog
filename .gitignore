@@ -48,3 +48,8 @@ Desktop.ini
 *.temp
 *.bak
 *~
+# Blender backups
+*.blend1
+
+# Python
+__pycache__/
