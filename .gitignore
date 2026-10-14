@@ -50,3 +50,6 @@ Desktop.ini
 *~
 # Blender backups
 *.blend1
+
+# Python
+__pycache__/
