@@ -27,6 +27,13 @@ ItsAFrogEditor Win64 Development
 
 1. Run `python Tools/FrogDemo/fetch_assets.py` to download the prop GLBs from Meshy and copy the packaged frog into `ExternalAssets/stylized-assets` (git-ignored because the GLBs are large).
 2. Build and open the editor, then run `Tools/FrogDemo/build_frog_demo.py` with **Tools > Execute Python Script**.
+   Or run it without opening the editor UI yourself (the editor starts, runs the script and quits):
+
+   ```text
+   UnrealEditor.exe "<path>\ItsAFrog.uproject" -ExecutePythonScript="<path>\Tools\FrogDemo\build_frog_demo.py" -unattended -nosplash
+   ```
+
+   Don't use the `-run=pythonscript` commandlet: it imports the assets but crashes in UE 5.8 once the script starts spawning actors into the new level.
 3. Open `/Game/Stylized/Demo/Lvl_FrogDemo` and press Play.
 
 The script imports the assets to `/Game/Stylized`, creates `BP_DemoFrog` and `BP_FrogDemoGameMode`, and lays the level out from `Tools/FrogDemo/frog_demo_layout.json` (metres, Unreal axes). Edit the layout and rerun the script to rebuild the level.
