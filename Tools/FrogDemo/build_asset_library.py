@@ -8,7 +8,7 @@ gallery as the frog: the level reuses BP_FrogDemoGameMode when it exists.
 
 What it does:
   1. Imports every GLB in library_layout.json to /Game/Stylized/Library/<name>.
-     Already-imported assets are reused; set FROG_DEMO_REIMPORT=1 to import again.
+     Already-imported assets are reused; set FROG_DEMO_REIMPORT=1 to import again (or a comma-separated list of asset names, e.g. bush,fern).
   2. Builds /Game/Stylized/Library/Lvl_AssetLibrary: each prop at its real-world
      size (frog = 1 m) on a grid with a name label, under plain daylight so the
      colours read true.
@@ -25,7 +25,8 @@ sys.path.insert(0, HERE)
 import ground_materials  # noqa: E402
 PROJECT_DIR = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
 ASSET_DIR = os.environ.get("FROG_ASSET_DIR", os.path.join(PROJECT_DIR, "ExternalAssets", "stylized-assets"))
-REIMPORT = os.environ.get("FROG_DEMO_REIMPORT") == "1"
+# "1" reimports everything; a comma-separated list of asset names reimports just those.
+REIMPORT = os.environ.get("FROG_DEMO_REIMPORT", "")
 LAYOUT = json.load(open(os.path.join(HERE, "library_layout.json")))
 
 ROOT = "/Game/Stylized/Library"
@@ -53,7 +54,7 @@ def setp(obj, key, value):
 def import_mesh(name):
     src = os.path.join(ASSET_DIR, "library", f"{name}.glb")
     dest = f"{ROOT}/{name}"
-    if not (assets.does_directory_exist(dest) and assets.list_assets(dest)) or REIMPORT:
+    if not (assets.does_directory_exist(dest) and assets.list_assets(dest)) or REIMPORT == "1" or name in REIMPORT.split(","):
         if not os.path.exists(src):
             unreal.log_warning(f"[AssetLibrary] missing {src}")
             return None

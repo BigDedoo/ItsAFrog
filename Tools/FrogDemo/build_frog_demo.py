@@ -8,7 +8,7 @@ What it does:
   1. Imports every prop GLB in frog_demo_layout.json to /Game/Stylized/Props/<name>
      and the packaged frog (demo/SK_Frog.glb: Idle, Walk, Run, TongueSocket bone)
      to /Game/Stylized/Frog. Already-imported assets are reused; set
-     FROG_DEMO_REIMPORT=1 to import again.
+     FROG_DEMO_REIMPORT=1 to import again (or a comma-separated list of asset names, e.g. bush,fern).
   2. Creates BP_DemoFrog (AFrogCharacter with the stylized mesh, clips and the
      diorama camera) and BP_FrogDemoGameMode (the third-person game mode
      spawning BP_DemoFrog).
@@ -30,7 +30,12 @@ sys.path.insert(0, HERE)
 import ground_materials  # noqa: E402
 PROJECT_DIR = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
 ASSET_DIR = os.environ.get("FROG_ASSET_DIR", os.path.join(PROJECT_DIR, "ExternalAssets", "stylized-assets"))
-REIMPORT = os.environ.get("FROG_DEMO_REIMPORT") == "1"
+# "1" reimports everything; a comma-separated list of asset names reimports just those.
+REIMPORT = os.environ.get("FROG_DEMO_REIMPORT", "")
+
+
+def reimport(name):
+    return REIMPORT == "1" or name in REIMPORT.split(",")
 LAYOUT = json.load(open(os.path.join(HERE, "frog_demo_layout.json")))
 
 ROOT = "/Game/Stylized"
@@ -63,7 +68,7 @@ def import_glb(src, dest):
     if not os.path.exists(src):
         unreal.log_warning(f"[FrogDemo] missing {src}")
         return []
-    if assets.does_directory_exist(dest) and assets.list_assets(dest) and not REIMPORT:
+    if assets.does_directory_exist(dest) and assets.list_assets(dest) and not reimport(os.path.splitext(os.path.basename(src))[0]):
         return [assets.load_asset(p) for p in assets.list_assets(dest, recursive=True)]
     task = unreal.AssetImportTask()
     task.set_editor_property("filename", src)
