@@ -38,6 +38,8 @@ ItsAFrogEditor Win64 Development
 
 The script imports the assets to `/Game/Stylized`, creates `BP_DemoFrog` and `BP_FrogDemoGameMode`, and lays the level out from `Tools/FrogDemo/frog_demo_layout.json` (metres, Unreal axes). Edit the layout and rerun the script to rebuild the level.
 
+`Tools/FrogDemo/build_asset_library.py` (run the same way, after `fetch_assets.py`) imports the basic asset library, 20 props listed in `library_layout.json`, to `/Game/Stylized/Library` and lays them out at real-world size in `/Game/Stylized/Library/Lvl_AssetLibrary`. Run `build_frog_demo.py` first to walk the gallery as the frog.
+
 `AFrogCharacter` options used by the demo:
 
 - **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces. The mouse wheel (or gamepad shoulders) zooms between `DioramaMinArmLength` and `DioramaMaxArmLength`, `DioramaZoomStep` per wheel notch; assign `ZoomAction` to use your own input action, otherwise one is created at runtime.

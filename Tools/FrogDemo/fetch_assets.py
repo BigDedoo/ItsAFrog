@@ -1,6 +1,7 @@
 """Download the demo's prop GLBs into ExternalAssets/stylized-assets.
 
-The props come straight from Meshy's CDN (links in asset_urls.json); the
+The props come straight from Meshy's CDN (links in asset_urls.json, and
+library_urls.json for the basic asset library, which lands in library/); the
 packaged frog (SK_Frog.glb) ships next to this script. Run with any Python 3:
 
     python Tools/FrogDemo/fetch_assets.py
@@ -14,15 +15,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "..", "ExternalAssets", "stylized-assets")
 
 
-def main():
-    os.makedirs(os.path.join(OUT, "demo"), exist_ok=True)
-    for name, url in json.load(open(os.path.join(HERE, "asset_urls.json"))).items():
-        dest = os.path.join(OUT, f"{name}.glb")
+def fetch(urls, out):
+    os.makedirs(out, exist_ok=True)
+    for name, url in json.load(open(os.path.join(HERE, urls))).items():
+        dest = os.path.join(out, f"{name}.glb")
         if os.path.exists(dest):
             continue
         print("downloading", name)
         urllib.request.urlretrieve(url, dest + ".part")
         os.replace(dest + ".part", dest)
+
+
+def main():
+    os.makedirs(os.path.join(OUT, "demo"), exist_ok=True)
+    fetch("asset_urls.json", OUT)
+    fetch("library_urls.json", os.path.join(OUT, "library"))
     shutil.copyfile(os.path.join(HERE, "SK_Frog.glb"), os.path.join(OUT, "demo", "SK_Frog.glb"))
     print("assets ready in", os.path.abspath(OUT))
 
