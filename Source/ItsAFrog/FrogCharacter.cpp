@@ -10,9 +10,15 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/SkeletalMesh.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "InputAction.h"
 #include "InputActionValue.h"
+#include "InputMappingContext.h"
+#include "InputModifiers.h"
 #include "TongueAnimInstance.h"
 #include "ItsAFrog.h"
 #include "UObject/ConstructorHelpers.h"
@@ -104,6 +110,10 @@ void AFrogCharacter::BeginPlay()
 void AFrogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (bUseDioramaCamera && CameraBoom)
+	{
+		CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, DioramaArmLength, DeltaTime, DioramaZoomSpeed);
+	}
 	TickLocomotion();
 	TickTongue(DeltaTime);
 }
@@ -197,6 +207,9 @@ void AFrogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AFrogCharacter::Look);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrogCharacter::Look);
 
+		EnsureZoomInput();
+		EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AFrogCharacter::Zoom);
+
 		if (TongueAction)
 		{
 			EnhancedInputComponent->BindAction(TongueAction, ETriggerEvent::Started, this, &AFrogCharacter::HandleTongueStarted);
@@ -214,6 +227,46 @@ void AFrogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
+void AFrogCharacter::NotifyControllerChanged()
+{
+	Super::NotifyControllerChanged();
+
+	if (const APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			EnsureZoomInput();
+			Subsystem->AddMappingContext(ZoomMappingContext, 1);
+		}
+	}
+}
+
+void AFrogCharacter::EnsureZoomInput()
+{
+	if (ZoomMappingContext)
+	{
+		return;
+	}
+
+	if (!ZoomAction)
+	{
+		ZoomAction = NewObject<UInputAction>(this, TEXT("IA_DioramaZoom"));
+		ZoomAction->ValueType = EInputActionValueType::Axis1D;
+	}
+
+	// The wheel reports one unit per notch; held shoulders are scaled to about eight notches a second.
+	ZoomMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_DioramaZoom"));
+	ZoomMappingContext->MapKey(ZoomAction, EKeys::MouseWheelAxis);
+	for (const FKey& Key : { EKeys::Gamepad_RightShoulder, EKeys::Gamepad_LeftShoulder })
+	{
+		FEnhancedActionKeyMapping& Mapping = ZoomMappingContext->MapKey(ZoomAction, Key);
+		Mapping.Modifiers.Add(NewObject<UInputModifierScaleByDeltaTime>(ZoomMappingContext));
+		UInputModifierScalar* Rate = NewObject<UInputModifierScalar>(ZoomMappingContext);
+		Rate->Scalar = FVector(Key == EKeys::Gamepad_LeftShoulder ? -8.0 : 8.0);
+		Mapping.Modifiers.Add(Rate);
+	}
+}
+
 void AFrogCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
@@ -224,6 +277,21 @@ void AFrogCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
+}
+
+void AFrogCharacter::Zoom(const FInputActionValue& Value)
+{
+	DoZoom(Value.Get<float>());
+}
+
+void AFrogCharacter::DoZoom(float Amount)
+{
+	if (bUseDioramaCamera)
+	{
+		const float Closest = FMath::Min(DioramaMinArmLength, DioramaMaxArmLength);
+		const float Farthest = FMath::Max(DioramaMinArmLength, DioramaMaxArmLength);
+		DioramaArmLength = FMath::Clamp(DioramaArmLength - Amount * DioramaZoomStep, Closest, Farthest);
+	}
 }
 
 void AFrogCharacter::DoMove(float Right, float Forward)

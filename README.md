@@ -40,6 +40,6 @@ The script imports the assets to `/Game/Stylized`, creates `BP_DemoFrog` and `BP
 
 `AFrogCharacter` options used by the demo:
 
-- **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces.
-- **Character > Stylized**: `StylizedMesh` swaps in a skeletal mesh and fits the capsule to it. Use `StylizedMeshYaw` if the model faces the wrong way.
+- **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces. The mouse wheel (or gamepad shoulders) zooms between `DioramaMinArmLength` and `DioramaMaxArmLength`, `DioramaZoomStep` per wheel notch; assign `ZoomAction` to use your own input action, otherwise one is created at runtime.
+- **Character > Stylized**: `StylizedMesh` swaps in a skeletal mesh and fits the capsule to it. Use `StylizedMeshYaw` if the model faces the wrong way (the packaged demo frog needs -90, set from `frog.mesh_yaw` in the layout).
 - **Character > Locomotion**: `IdleAnimation`, `WalkAnimation`, `RunAnimation` and `RunSpeedThreshold` play clips by speed when the mesh has no Animation Blueprint.

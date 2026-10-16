@@ -10,6 +10,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class USkeletalMeshComponent;
 class UInputAction;
+class UInputMappingContext;
 class UPrimitiveComponent;
 class USkeletalMesh;
 class UAnimSequence;
@@ -52,6 +53,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
+
+	/** Axis1D zoom (positive zooms in). When unset, one is created at runtime. Mouse wheel and gamepad shoulders are mapped to it either way. */
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> ZoomAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tongue|Input")
 	TObjectPtr<UInputAction> TongueAction;
@@ -112,6 +117,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
 	float DioramaArmLength = 1500.0f;
 
+	/** Closest and farthest the zoom input can bring the diorama camera. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
+	float DioramaMinArmLength = 600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
+	float DioramaMaxArmLength = 3000.0f;
+
+	/** Arm length change per mouse-wheel notch (gamepad shoulders zoom at about eight notches a second). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0", Units="cm"))
+	float DioramaZoomStep = 150.0f;
+
+	/** How quickly the camera eases to the zoomed arm length. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0"))
+	float DioramaZoomSpeed = 10.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="5.0", ClampMax="170.0", Units="deg"))
 	float DioramaFieldOfView = 35.0f;
 
@@ -143,6 +163,7 @@ public:
 protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Zoom(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoMove(float Right, float Forward);
@@ -172,6 +193,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void NotifyControllerChanged() override;
+
+	/** Zooms the diorama camera in (positive) or out (negative), in mouse-wheel notches. */
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void DoZoom(float Amount);
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
@@ -182,9 +208,13 @@ protected:
 	void ApplyStylizedMesh();
 	void TickLocomotion();
 	FRotator GetMovementBasis() const;
+	void EnsureZoomInput();
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimSequence> CurrentLocomotionAnimation;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputMappingContext> ZoomMappingContext;
 
 	void HandleTongueStarted();
 	void HandleTongueCompleted();
