@@ -110,7 +110,35 @@ def import_frog():
             for clip in ("idle", "walk", "run"):
                 if clip in o.get_name().lower():
                     clips[clip] = o
-    return first(objs, unreal.SkeletalMesh), clips
+    mesh = first(objs, unreal.SkeletalMesh)
+    if mesh:
+        use_skinned_parents(mesh)
+    return mesh, clips
+
+
+def use_skinned_parents(mesh):
+    """Reparent the mesh's glTF material instances to project copies flagged for skeletal meshes.
+
+    Interchange parents glTF instances to the engine's M_GLTF, which lacks the SkeletalMesh usage
+    flag and, being engine content, can't be saved with it, so the skinned frog fell back to the
+    grey default material in game.
+    """
+    for slot in mesh.get_editor_property("materials"):
+        mi = slot.get_editor_property("material_interface")
+        parent = mi.get_editor_property("parent") if isinstance(mi, unreal.MaterialInstanceConstant) else None
+        if not isinstance(parent, unreal.Material) or parent.get_editor_property("used_with_skeletal_mesh"):
+            continue
+        path = f"{ROOT}/Frog/{parent.get_name()}_Skinned"
+        if not assets.does_asset_exist(path):
+            assets.duplicate_asset(parent.get_path_name().split(".")[0], path)
+        skinned = assets.load_asset(path)
+        if not skinned.get_editor_property("used_with_skeletal_mesh"):
+            skinned.set_editor_property("used_with_skeletal_mesh", True)
+            unreal.MaterialEditingLibrary.recompile_material(skinned)
+            assets.save_asset(path)
+        unreal.MaterialEditingLibrary.set_material_instance_parent(mi, skinned)
+        assets.save_loaded_asset(mi, only_if_is_dirty=False)  # reparenting doesn't mark the package dirty
+        log(f"{mi.get_name()} now uses {path} (skeletal-mesh usage)")
 
 
 # ---------------------------------------------------------------- blueprints
