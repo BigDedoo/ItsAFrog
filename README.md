@@ -20,3 +20,19 @@ Build the editor target for Development Win64 with Unreal Engine 5.8:
 ```text
 ItsAFrogEditor Win64 Development
 ```
+
+## Stylized frog demo
+
+`Tools/FrogDemo` builds `Lvl_FrogDemo`, a small night-time diorama that shows off the stylized Meshy asset set with a high three-quarter camera.
+
+1. Copy the `stylized-assets` folder (prop GLBs plus `demo/SK_Frog.glb`) to `ExternalAssets/stylized-assets` in the project folder. It is git-ignored because the GLBs are large.
+2. Build and open the editor, then run `Tools/FrogDemo/build_frog_demo.py` with **Tools > Execute Python Script**.
+3. Open `/Game/Stylized/Demo/Lvl_FrogDemo` and press Play.
+
+The script imports the assets to `/Game/Stylized`, creates `BP_DemoFrog` and `BP_FrogDemoGameMode`, and lays the level out from `Tools/FrogDemo/frog_demo_layout.json` (metres, Unreal axes). Edit the layout and rerun the script to rebuild the level.
+
+`AFrogCharacter` options used by the demo:
+
+- **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces.
+- **Character > Stylized**: `StylizedMesh` swaps in a skeletal mesh and fits the capsule to it. Use `StylizedMeshYaw` if the model faces the wrong way.
+- **Character > Locomotion**: `IdleAnimation`, `WalkAnimation`, `RunAnimation` and `RunSpeedThreshold` play clips by speed when the mesh has no Animation Blueprint.

@@ -2,11 +2,13 @@
 
 #include "FrogCharacter.h"
 
+#include "Animation/AnimSequence.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/SkeletalMesh.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -78,10 +80,20 @@ AFrogCharacter::AFrogCharacter()
 	TongueMesh->SetComponentTickEnabled(false);
 }
 
+void AFrogCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	ApplyStylizedMesh();
+	ApplyCameraMode();
+}
+
 void AFrogCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ApplyStylizedMesh();
+	ApplyCameraMode();
 	ValidateTongueConfiguration();
 	if (GetMesh() && GetMesh()->DoesSocketExist(TongueSocketName))
 	{
@@ -92,7 +104,87 @@ void AFrogCharacter::BeginPlay()
 void AFrogCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	TickLocomotion();
 	TickTongue(DeltaTime);
+}
+
+void AFrogCharacter::ApplyCameraMode()
+{
+	if (!CameraBoom || !FollowCamera || !bUseDioramaCamera)
+	{
+		return;
+	}
+
+	CameraBoom->bUsePawnControlRotation = false;
+	CameraBoom->bInheritPitch = false;
+	CameraBoom->bInheritYaw = false;
+	CameraBoom->bInheritRoll = false;
+	CameraBoom->bDoCollisionTest = false;
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->CameraLagSpeed = 8.0f;
+	CameraBoom->TargetArmLength = DioramaArmLength;
+	CameraBoom->SetUsingAbsoluteRotation(true);
+	CameraBoom->SetWorldRotation(FRotator(DioramaPitch, DioramaYaw, 0.0f));
+	FollowCamera->SetFieldOfView(DioramaFieldOfView);
+}
+
+void AFrogCharacter::ApplyStylizedMesh()
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (!StylizedMesh || !MeshComponent)
+	{
+		return;
+	}
+
+	if (MeshComponent->GetSkeletalMeshAsset() != StylizedMesh)
+	{
+		MeshComponent->SetSkeletalMeshAsset(StylizedMesh);
+		CurrentLocomotionAnimation = nullptr;
+	}
+
+	// Fit the capsule to the mesh; the mesh origin is at the feet.
+	const FBoxSphereBounds Bounds = StylizedMesh->GetBounds();
+	const float MeshHeight = static_cast<float>(Bounds.Origin.Z + Bounds.BoxExtent.Z);
+	const float MeshHalfWidth = static_cast<float>(FMath::Min(Bounds.BoxExtent.X, Bounds.BoxExtent.Y));
+	const float HalfHeight = FMath::Max(MeshHeight, 20.0f) * 0.5f;
+	const float Radius = FMath::Clamp(MeshHalfWidth * 0.8f, 10.0f, HalfHeight);
+	GetCapsuleComponent()->SetCapsuleSize(Radius, HalfHeight);
+	MeshComponent->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -HalfHeight), FRotator(0.0f, StylizedMeshYaw, 0.0f));
+}
+
+void AFrogCharacter::TickLocomotion()
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (!WalkAnimation || !MeshComponent || MeshComponent->GetAnimClass())
+	{
+		return;
+	}
+
+	const float Speed = GetVelocity().Size2D();
+	UAnimSequence* Desired = WalkAnimation;
+	if (Speed < 10.0f && IdleAnimation)
+	{
+		Desired = IdleAnimation;
+	}
+	else if (Speed > RunSpeedThreshold && RunAnimation)
+	{
+		Desired = RunAnimation;
+	}
+
+	if (Desired != CurrentLocomotionAnimation)
+	{
+		MeshComponent->PlayAnimation(Desired, true);
+		CurrentLocomotionAnimation = Desired;
+	}
+}
+
+FRotator AFrogCharacter::GetMovementBasis() const
+{
+	if (bUseDioramaCamera && CameraBoom)
+	{
+		return FRotator(0.0f, CameraBoom->GetComponentRotation().Yaw, 0.0f);
+	}
+	return GetController() ? FRotator(0.0f, GetController()->GetControlRotation().Yaw, 0.0f) : FRotator::ZeroRotator;
 }
 
 void AFrogCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -138,8 +230,7 @@ void AFrogCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController() != nullptr)
 	{
-		const FRotator Rotation = GetController()->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FRotator YawRotation = GetMovementBasis();
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -150,6 +241,16 @@ void AFrogCharacter::DoMove(float Right, float Forward)
 
 void AFrogCharacter::DoLook(float Yaw, float Pitch)
 {
+	if (bUseDioramaCamera)
+	{
+		if (CameraBoom && DioramaTurnScale > 0.0f)
+		{
+			DioramaYaw = FMath::UnwindDegrees(DioramaYaw + Yaw * DioramaTurnScale);
+			CameraBoom->SetWorldRotation(FRotator(DioramaPitch, DioramaYaw, 0.0f));
+		}
+		return;
+	}
+
 	if (GetController() != nullptr)
 	{
 		AddControllerYawInput(Yaw);
@@ -203,7 +304,10 @@ void AFrogCharacter::LaunchTongue()
 		return;
 	}
 
-	const FVector AimDirection = FollowCamera
+	// The diorama camera looks down at the frog, so aim along the frog's facing instead.
+	const FVector AimDirection = bUseDioramaCamera
+		? GetActorForwardVector()
+		: FollowCamera
 		? FollowCamera->GetForwardVector().GetSafeNormal()
 		: (GetController() ? GetController()->GetControlRotation().Vector().GetSafeNormal() : FVector::ZeroVector);
 	if (AimDirection.IsNearlyZero())
