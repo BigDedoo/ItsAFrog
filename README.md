@@ -25,7 +25,7 @@ ItsAFrogEditor Win64 Development
 
 `Tools/FrogDemo` builds `Lvl_FrogDemo`, a small night-time diorama that shows off the stylized Meshy asset set with a high three-quarter camera.
 
-1. Copy the `stylized-assets` folder (prop GLBs plus `demo/SK_Frog.glb`) to `ExternalAssets/stylized-assets` in the project folder. It is git-ignored because the GLBs are large.
+1. Run `python Tools/FrogDemo/fetch_assets.py` to download the prop GLBs from Meshy and copy the packaged frog into `ExternalAssets/stylized-assets` (git-ignored because the GLBs are large).
 2. Build and open the editor, then run `Tools/FrogDemo/build_frog_demo.py` with **Tools > Execute Python Script**.
 3. Open `/Game/Stylized/Demo/Lvl_FrogDemo` and press Play.
 
