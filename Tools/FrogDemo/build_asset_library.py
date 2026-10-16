@@ -16,10 +16,13 @@ What it does:
 import json
 import math
 import os
+import sys
 
 import unreal
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import ground_materials  # noqa: E402
 PROJECT_DIR = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
 ASSET_DIR = os.environ.get("FROG_ASSET_DIR", os.path.join(PROJECT_DIR, "ExternalAssets", "stylized-assets"))
 REIMPORT = os.environ.get("FROG_DEMO_REIMPORT") == "1"
@@ -28,7 +31,6 @@ LAYOUT = json.load(open(os.path.join(HERE, "library_layout.json")))
 ROOT = "/Game/Stylized/Library"
 LEVEL = ROOT + "/Lvl_AssetLibrary"
 GAME_MODE = "/Game/Stylized/Demo/BP_FrogDemoGameMode"
-GROUND_MATERIAL = "/Game/Stylized/Demo/M_DemoGrass"
 M = 100.0  # layout metres -> Unreal centimetres
 
 assets = unreal.EditorAssetLibrary
@@ -125,7 +127,7 @@ def label(text, x, y):
     setp(c, "world_size", 45.0)
     setp(c, "horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
     setp(c, "vertical_alignment", unreal.VerticalTextAligment.EVRTA_TEXT_BOTTOM)
-    c.set_text_render_color(unreal.Color(255, 230, 190, 255))
+    c.set_text_render_color(unreal.Color(70, 45, 25, 255))  # dark brown reads on the sunlit grass
 
 
 def daylight():
@@ -137,6 +139,13 @@ def daylight():
     sky = spawn(unreal.SkyLight, unreal.Vector(0, 0, 500), label="SkyLight")
     setp(sky.get_component_by_class(unreal.SkyLightComponent), "real_time_capture", True)
     spawn(unreal.ExponentialHeightFog, unreal.Vector(0, 0, 0), label="Fog")
+    # Auto exposure would otherwise brighten the tinted grass back to a washed-out pastel.
+    ppv = spawn(unreal.PostProcessVolume, unreal.Vector(0, 0, 0), label="DaylightPostProcess")
+    ppv.set_editor_property("unbound", True)
+    s = ppv.get_editor_property("settings")
+    setp(s, "override_auto_exposure_bias", True)
+    setp(s, "auto_exposure_bias", -0.7)
+    ppv.set_editor_property("settings", s)
 
 
 def main():
@@ -156,8 +165,8 @@ def main():
                                            unreal.Vector(0, 0, -10))
     floor.set_actor_label("Ground")
     floor.set_actor_scale3d(unreal.Vector(step * (cols + 1) / 100, step * (rows + 1) / 100, 0.2))
-    if assets.does_asset_exist(GROUND_MATERIAL):  # the engine's white default washes out in daylight
-        floor.get_editor_property("static_mesh_component").set_material(0, assets.load_asset(GROUND_MATERIAL))
+    grass = ground_materials.tinted_material("grass", LAYOUT["ground_tint"], "Day")  # full-bright paint washes out in sun
+    floor.get_editor_property("static_mesh_component").set_material(0, grass)
 
     for i, e in enumerate(props):
         # Rows run along X (away from the start), columns along Y, centred on the origin.

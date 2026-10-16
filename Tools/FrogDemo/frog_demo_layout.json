@@ -2,6 +2,7 @@
   "_doc": "Frog demo diorama. Unreal axes in metres: x forward (north), y right (east), z up; yaw in degrees (Unreal convention). Each prop is scaled so its bounds match 'height' (or 'width' for flat pieces). 'light' adds a warm point light at that fraction of the prop's height.",
   "camera": {"pitch": -40, "yaw": 45, "arm_length_m": 15, "min_arm_length_m": 6, "max_arm_length_m": 30, "fov": 35},
   "frog": {"mesh_yaw": -90},
+  "ground_tint": [0.5, 0.5, 0.55],
   "player_start": {"x": 0, "y": 0, "z": 0.2, "yaw": 45},
   "ground": {"x": 8, "y": 8, "radius": 22, "thickness": 2.0},
   "water": [{"x": 15, "y": 15, "radius": 5.5}],

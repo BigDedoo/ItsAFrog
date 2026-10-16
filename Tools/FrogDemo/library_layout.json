@@ -1,6 +1,7 @@
 {
   "columns": 5,
   "spacing": 7.0,
+  "ground_tint": [0.6, 0.62, 0.6],
   "props": [
     {"asset": "round_tree", "height": 5.0},
     {"asset": "tree_stump", "height": 0.8},

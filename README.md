@@ -40,6 +40,8 @@ The script imports the assets to `/Game/Stylized`, creates `BP_DemoFrog` and `BP
 
 `Tools/FrogDemo/build_asset_library.py` (run the same way, after `fetch_assets.py`) imports the basic asset library, 20 props listed in `library_layout.json`, to `/Game/Stylized/Library` and lays them out at real-world size in `/Game/Stylized/Library/Lvl_AssetLibrary`. Run `build_frog_demo.py` first to walk the gallery as the frog.
 
+Both builders call `Tools/FrogDemo/ground_materials.py`, which imports the painted grass and dirt textures in `Tools/FrogDemo/textures` to `/Game/Stylized/Ground` and builds `M_StylizedGrass` (4 m per repeat) and `M_StylizedDirt` (3 m). They are mapped in world space, so they keep the same scale on any mesh, and blend in a larger second sample so the repeat doesn't show. Each level uses a tinted instance (`ground_tint` in its layout file) to suit its lighting.
+
 `AFrogCharacter` options used by the demo:
 
 - **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces. The mouse wheel (or gamepad shoulders) zooms between `DioramaMinArmLength` and `DioramaMaxArmLength`, `DioramaZoomStep` per wheel notch; assign `ZoomAction` to use your own input action, otherwise one is created at runtime.

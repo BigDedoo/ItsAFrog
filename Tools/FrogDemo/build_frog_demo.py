@@ -21,10 +21,13 @@ Rerunning rebuilds the level from scratch; the layout file is the source of trut
 import json
 import math
 import os
+import sys
 
 import unreal
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import ground_materials  # noqa: E402
 PROJECT_DIR = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
 ASSET_DIR = os.environ.get("FROG_ASSET_DIR", os.path.join(PROJECT_DIR, "ExternalAssets", "stylized-assets"))
 REIMPORT = os.environ.get("FROG_DEMO_REIMPORT") == "1"
@@ -280,9 +283,10 @@ def main():
         unreal.log_warning("[FrogDemo] frog skeletal mesh not found; BP_DemoFrog keeps the default mesh")
     frog_cls = make_frog_blueprint(frog_mesh, clips)
     gm_cls = make_game_mode(frog_cls)
-    grass = flat_material("M_DemoGrass", (0.05, 0.16, 0.07), 1.0, 0.2)
+    tint = LAYOUT["ground_tint"]  # darkens the painted grass/dirt for the night lighting
+    grass = ground_materials.tinted_material("grass", tint, "Night")
     water = flat_material("M_DemoWater", (0.01, 0.04, 0.09), 0.05, 0.8)
-    path_m = flat_material("M_DemoPath", (0.11, 0.08, 0.055), 1.0, 0.2)
+    path_m = ground_materials.tinted_material("dirt", tint, "Night")
 
     fresh_level()
     g = LAYOUT["ground"]
