@@ -104,13 +104,13 @@ public:
 	bool bUseDioramaCamera = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="-89.0", ClampMax="-5.0", Units="deg"))
-	float DioramaPitch = -45.0f;
+	float DioramaPitch = -40.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", Units="deg"))
 	float DioramaYaw = 45.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
-	float DioramaArmLength = 2000.0f;
+	float DioramaArmLength = 1500.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="5.0", ClampMax="170.0", Units="deg"))
 	float DioramaFieldOfView = 35.0f;
