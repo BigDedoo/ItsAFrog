@@ -28,6 +28,7 @@ LAYOUT = json.load(open(os.path.join(HERE, "library_layout.json")))
 ROOT = "/Game/Stylized/Library"
 LEVEL = ROOT + "/Lvl_AssetLibrary"
 GAME_MODE = "/Game/Stylized/Demo/BP_FrogDemoGameMode"
+GROUND_MATERIAL = "/Game/Stylized/Demo/M_DemoGrass"
 M = 100.0  # layout metres -> Unreal centimetres
 
 assets = unreal.EditorAssetLibrary
@@ -89,8 +90,13 @@ def place(e, mesh, x, y):
         k = e["width"] * M / max(hi.x - lo.x, hi.y - lo.y, 1e-3)
     else:
         k = e["height"] * M / max(hi.z - lo.z, 1e-3)
-    loc = unreal.Vector(x - (lo.x + hi.x) / 2 * k, y - (lo.y + hi.y) / 2 * k, e.get("z", 0.0) * M - lo.z * k)
-    a = actors.spawn_actor_from_object(mesh, loc, unreal.Rotator(0, 0, 0))
+    yaw = float(e.get("yaw", 0))
+    # Put the scaled, rotated bounds centre on (x, y) and the bottom on z.
+    cx, cy = (lo.x + hi.x) / 2 * k, (lo.y + hi.y) / 2 * k
+    r = math.radians(yaw)
+    ox, oy = cx * math.cos(r) - cy * math.sin(r), cx * math.sin(r) + cy * math.cos(r)
+    loc = unreal.Vector(x - ox, y - oy, e.get("z", 0.0) * M - lo.z * k)
+    a = actors.spawn_actor_from_object(mesh, loc, unreal.Rotator(0, 0, yaw))
     a.set_actor_label(e["asset"])
     a.set_actor_scale3d(unreal.Vector(k, k, k))
     comp = a.get_editor_property("static_mesh_component")
@@ -112,11 +118,13 @@ def place(e, mesh, x, y):
 
 
 def label(text, x, y):
-    a = spawn(unreal.TextRenderActor, unreal.Vector(x, y, 5), unreal.Rotator(0, 90, 180), f"label_{text}")
+    # Upright on the ground, reading towards -X where the PlayerStart is.
+    a = spawn(unreal.TextRenderActor, unreal.Vector(x, y, 2), unreal.Rotator(0, 0, 180), f"label_{text}")
     c = a.get_editor_property("text_render")
     c.set_text(text.replace("_", " "))
     setp(c, "world_size", 45.0)
     setp(c, "horizontal_alignment", unreal.HorizTextAligment.EHTA_CENTER)
+    setp(c, "vertical_alignment", unreal.VerticalTextAligment.EVRTA_TEXT_BOTTOM)
     c.set_text_render_color(unreal.Color(255, 230, 190, 255))
 
 
@@ -148,6 +156,8 @@ def main():
                                            unreal.Vector(0, 0, -10))
     floor.set_actor_label("Ground")
     floor.set_actor_scale3d(unreal.Vector(step * (cols + 1) / 100, step * (rows + 1) / 100, 0.2))
+    if assets.does_asset_exist(GROUND_MATERIAL):  # the engine's white default washes out in daylight
+        floor.get_editor_property("static_mesh_component").set_material(0, assets.load_asset(GROUND_MATERIAL))
 
     for i, e in enumerate(props):
         # Rows run along X (away from the start), columns along Y, centred on the origin.
