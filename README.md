@@ -20,3 +20,30 @@ Build the editor target for Development Win64 with Unreal Engine 5.8:
 ```text
 ItsAFrogEditor Win64 Development
 ```
+
+## Stylized frog demo
+
+`Tools/FrogDemo` builds `Lvl_FrogDemo`, a small night-time diorama that shows off the stylized Meshy asset set with a high three-quarter camera.
+
+1. Run `python Tools/FrogDemo/fetch_assets.py` to download the prop GLBs from Meshy and copy the packaged frog into `ExternalAssets/stylized-assets` (git-ignored because the GLBs are large).
+2. Build and open the editor, then run `Tools/FrogDemo/build_frog_demo.py` with **Tools > Execute Python Script**.
+   Or run it without opening the editor UI yourself (the editor starts, runs the script and quits):
+
+   ```text
+   UnrealEditor.exe "<path>\ItsAFrog.uproject" -ExecutePythonScript="<path>\Tools\FrogDemo\build_frog_demo.py" -unattended -nosplash
+   ```
+
+   Don't use the `-run=pythonscript` commandlet: it imports the assets but crashes in UE 5.8 once the script starts spawning actors into the new level.
+3. Open `/Game/Stylized/Demo/Lvl_FrogDemo` and press Play.
+
+The script imports the assets to `/Game/Stylized`, creates `BP_DemoFrog` and `BP_FrogDemoGameMode`, and lays the level out from `Tools/FrogDemo/frog_demo_layout.json` (metres, Unreal axes). Edit the layout and rerun the script to rebuild the level.
+
+`Tools/FrogDemo/build_asset_library.py` (run the same way, after `fetch_assets.py`) imports the basic asset library, 20 props listed in `library_layout.json`, to `/Game/Stylized/Library` and lays them out at real-world size in `/Game/Stylized/Library/Lvl_AssetLibrary`. Run `build_frog_demo.py` first to walk the gallery as the frog.
+
+Both builders call `Tools/FrogDemo/ground_materials.py`, which imports the painted grass and dirt textures in `Tools/FrogDemo/textures` to `/Game/Stylized/Ground` and builds `M_StylizedGrass` (4 m per repeat) and `M_StylizedDirt` (3 m). They are mapped in world space, so they keep the same scale on any mesh, and blend in a larger second sample so the repeat doesn't show. Each level uses a tinted instance (`ground_tint` in its layout file) to suit its lighting.
+
+`AFrogCharacter` options used by the demo:
+
+- **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces. The mouse wheel (or gamepad shoulders) zooms between `DioramaMinArmLength` and `DioramaMaxArmLength`, `DioramaZoomStep` per wheel notch; assign `ZoomAction` to use your own input action, otherwise one is created at runtime.
+- **Character > Stylized**: `StylizedMesh` swaps in a skeletal mesh and fits the capsule to it. Use `StylizedMeshYaw` if the model faces the wrong way (the packaged demo frog needs -90, set from `frog.mesh_yaw` in the layout).
+- **Character > Locomotion**: `IdleAnimation`, `WalkAnimation`, `RunAnimation` and `RunSpeedThreshold` play clips by speed when the mesh has no Animation Blueprint.

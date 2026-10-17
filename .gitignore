@@ -48,3 +48,10 @@ Desktop.ini
 *.temp
 *.bak
 *~
+
+# Stylized source assets (GLB/FBX) copied in for Tools/FrogDemo; too big for git
+ExternalAssets/
+
+# Python bytecode
+__pycache__/
+*.pyc

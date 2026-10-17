@@ -10,7 +10,10 @@ class USpringArmComponent;
 class UCameraComponent;
 class USkeletalMeshComponent;
 class UInputAction;
+class UInputMappingContext;
 class UPrimitiveComponent;
+class USkeletalMesh;
+class UAnimSequence;
 struct FInputActionValue;
 class UTongueAnimInstance;
 
@@ -50,6 +53,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
+
+	/** Axis1D zoom (positive zooms in). When unset, one is created at runtime. Mouse wheel and gamepad shoulders are mapped to it either way. */
+	UPROPERTY(EditAnywhere, Category="Input")
+	TObjectPtr<UInputAction> ZoomAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tongue|Input")
 	TObjectPtr<UInputAction> TongueAction;
@@ -96,8 +103,67 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tongue|State")
 	ETongueState TongueState = ETongueState::Hidden;
 
+public:
+	/** Fixed high three-quarter "diorama" camera instead of the free orbit camera. Movement follows the camera's yaw. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama")
+	bool bUseDioramaCamera = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="-89.0", ClampMax="-5.0", Units="deg"))
+	float DioramaPitch = -40.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", Units="deg"))
+	float DioramaYaw = 45.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
+	float DioramaArmLength = 1500.0f;
+
+	/** Closest and farthest the zoom input can bring the diorama camera. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
+	float DioramaMinArmLength = 600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="100.0", Units="cm"))
+	float DioramaMaxArmLength = 3000.0f;
+
+	/** Arm length change per mouse-wheel notch (gamepad shoulders zoom at about eight notches a second). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0", Units="cm"))
+	float DioramaZoomStep = 150.0f;
+
+	/** How quickly the camera eases to the zoomed arm length. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0"))
+	float DioramaZoomSpeed = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="5.0", ClampMax="170.0", Units="deg"))
+	float DioramaFieldOfView = 35.0f;
+
+	/** How much horizontal look input turns the diorama camera around the frog. 0 locks the angle. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0"))
+	float DioramaTurnScale = 1.0f;
+
+	/** When set, replaces the mesh component's skeletal mesh and fits the capsule to it (feet at the mesh origin). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Stylized")
+	TObjectPtr<USkeletalMesh> StylizedMesh;
+
+	/** Yaw applied to StylizedMesh so its front faces the actor's forward (+X). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Stylized", meta=(Units="deg"))
+	float StylizedMeshYaw = 0.0f;
+
+	/** Speed-picked clips played when the mesh has no Animation Blueprint. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Locomotion")
+	TObjectPtr<UAnimSequence> IdleAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Locomotion")
+	TObjectPtr<UAnimSequence> WalkAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Locomotion")
+	TObjectPtr<UAnimSequence> RunAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Locomotion", meta=(ClampMin="0.0", Units="cm/s"))
+	float RunSpeedThreshold = 350.0f;
+
+protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Zoom(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoMove(float Right, float Forward);
@@ -123,15 +189,33 @@ protected:
 public:
 	AFrogCharacter();
 
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void NotifyControllerChanged() override;
+
+	/** Zooms the diorama camera in (positive) or out (negative), in mouse-wheel notches. */
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void DoZoom(float Amount);
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE USkeletalMeshComponent* GetTongueMesh() const { return TongueMesh; }
 
 protected:
+	void ApplyCameraMode();
+	void ApplyStylizedMesh();
+	void TickLocomotion();
+	FRotator GetMovementBasis() const;
+	void EnsureZoomInput();
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequence> CurrentLocomotionAnimation;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputMappingContext> ZoomMappingContext;
+
 	void HandleTongueStarted();
 	void HandleTongueCompleted();
 	void HandleTongueCanceled();

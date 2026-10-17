@@ -1,0 +1,29 @@
+{
+  "columns": 5,
+  "spacing": 7.0,
+  "ground_tint": [0.6, 0.62, 0.6],
+  "props": [
+    {"asset": "round_tree", "height": 5.0},
+    {"asset": "tree_stump", "height": 0.8},
+    {"asset": "fallen_log", "width": 2.5},
+    {"asset": "cliff_rock", "height": 3.0},
+    {"asset": "pebbles", "width": 1.0, "collision": false},
+    {"asset": "flower_patch", "width": 1.2, "collision": false},
+    {"asset": "grass_tuft", "height": 0.5, "collision": false},
+    {"asset": "fern", "height": 0.9, "collision": false},
+    {"asset": "thorn_bramble", "width": 1.4, "hazard": true},
+    {"asset": "bush_b", "height": 1.3},
+    {"asset": "bush_round", "height": 1.2},
+    {"asset": "wooden_platform", "width": 2.5},
+    {"asset": "stone_pillar", "height": 2.0},
+    {"asset": "crate", "height": 0.8},
+    {"asset": "barrel", "height": 1.0},
+    {"asset": "ladder", "height": 3.0},
+    {"asset": "signpost", "height": 1.8},
+    {"asset": "well", "height": 2.5},
+    {"asset": "bench", "width": 1.6},
+    {"asset": "torch_post", "height": 2.2, "light": 0.9},
+    {"asset": "checkpoint_flag", "height": 2.4},
+    {"asset": "golden_fly", "height": 0.35, "yaw": 90, "z": 0.8, "collision": false, "collectible": true}
+  ]
+}
