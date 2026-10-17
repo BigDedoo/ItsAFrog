@@ -19,7 +19,6 @@ OUT = os.path.join(HERE, "..", "..", "ExternalAssets", "stylized-assets")
 
 # GLB path under stylized-assets -> height fraction of the top of its base
 BASE_CUTS = {
-    "bush.glb": 0.125,
     "mushroom.glb": 0.112,
     "library/grass_tuft.glb": 0.115,
     "library/fern.glb": 0.19,

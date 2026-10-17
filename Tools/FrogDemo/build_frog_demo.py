@@ -94,10 +94,19 @@ def use_complex_collision(mesh):
         unreal.log_warning(f"[FrogDemo] collision on {mesh.get_name()}: {e}")
 
 
+def prop_source(name):
+    """(GLB, destination) for a layout prop: the demo's own props, else the basic asset library's,
+    imported where build_asset_library.py puts them so both levels share one copy."""
+    own = os.path.join(ASSET_DIR, f"{name}.glb")
+    if os.path.exists(own):
+        return own, f"{ROOT}/Props/{name}"
+    return os.path.join(ASSET_DIR, "library", f"{name}.glb"), f"{ROOT}/Library/{name}"
+
+
 def import_props():
     meshes = {}
     for name in sorted({p["asset"] for p in LAYOUT["props"]}):
-        mesh = first(import_glb(os.path.join(ASSET_DIR, f"{name}.glb"), f"{ROOT}/Props/{name}"), unreal.StaticMesh)
+        mesh = first(import_glb(*prop_source(name)), unreal.StaticMesh)
         if mesh:
             if name not in NO_COLLISION:
                 use_complex_collision(mesh)
