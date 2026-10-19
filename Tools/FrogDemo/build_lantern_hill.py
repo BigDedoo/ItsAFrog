@@ -114,11 +114,13 @@ def make_frog():
                  ("stylized_capsule_height", LAYOUT["frog_capsule"]["height"] * M),
                  ("stylized_capsule_radius", LAYOUT["frog_capsule"]["radius"] * M),
                  ("diorama_pitch", float(cam["pitch"])), ("diorama_yaw", float(cam["yaw"])),
+                 ("diorama_min_pitch", float(cam["min_pitch"])), ("diorama_max_pitch", float(cam["max_pitch"])),
                  ("diorama_arm_length", cam["arm_length_m"] * M),
                  ("diorama_min_arm_length", cam["min_arm_length_m"] * M),
                  ("diorama_max_arm_length", cam["max_arm_length_m"] * M),
                  ("diorama_field_of_view", float(cam["fov"]))):
         setp(cdo, k, v)
+    setp(cdo.get_editor_property("character_movement"), "jump_z_velocity", float(LAYOUT["jump_z_velocity"]))
     assets.save_asset(path)
     return cls
 

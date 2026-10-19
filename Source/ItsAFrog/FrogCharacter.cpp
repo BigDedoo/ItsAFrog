@@ -311,9 +311,13 @@ void AFrogCharacter::DoLook(float Yaw, float Pitch)
 {
 	if (bUseDioramaCamera)
 	{
-		if (CameraBoom && DioramaTurnScale > 0.0f)
+		if (CameraBoom)
 		{
+			// Same sense as the orbit camera's AddControllerPitchInput: positive tilts towards the horizon.
+			const float Steepest = FMath::Min(DioramaMinPitch, DioramaMaxPitch);
+			const float Flattest = FMath::Max(DioramaMinPitch, DioramaMaxPitch);
 			DioramaYaw = FMath::UnwindDegrees(DioramaYaw + Yaw * DioramaTurnScale);
+			DioramaPitch = FMath::Clamp(DioramaPitch + Pitch * DioramaTiltScale, Steepest, Flattest);
 			CameraBoom->SetWorldRotation(FRotator(DioramaPitch, DioramaYaw, 0.0f));
 		}
 		return;

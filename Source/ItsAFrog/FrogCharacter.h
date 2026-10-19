@@ -104,7 +104,7 @@ protected:
 	ETongueState TongueState = ETongueState::Hidden;
 
 public:
-	/** Fixed high three-quarter "diorama" camera instead of the free orbit camera. Movement follows the camera's yaw. */
+	/** High three-quarter "diorama" camera instead of the free orbit camera; look input turns and tilts it around the frog. Movement follows the camera's yaw. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama")
 	bool bUseDioramaCamera = false;
 
@@ -138,6 +138,17 @@ public:
 	/** How much horizontal look input turns the diorama camera around the frog. 0 locks the angle. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0"))
 	float DioramaTurnScale = 1.0f;
+
+	/** How much vertical look input tilts the diorama camera between DioramaMinPitch and DioramaMaxPitch. 0 locks the tilt. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0"))
+	float DioramaTiltScale = 1.0f;
+
+	/** Steepest (most top-down) and flattest tilt the look input can give the diorama camera. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="-89.0", ClampMax="-5.0", Units="deg"))
+	float DioramaMinPitch = -75.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="-89.0", ClampMax="-5.0", Units="deg"))
+	float DioramaMaxPitch = -10.0f;
 
 	/** When set, replaces the mesh component's skeletal mesh and fits the capsule to it (feet at the mesh origin). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Stylized")
