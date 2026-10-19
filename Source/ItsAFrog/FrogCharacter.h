@@ -147,6 +147,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Stylized", meta=(Units="deg"))
 	float StylizedMeshYaw = 0.0f;
 
+	/** Capsule height for StylizedMesh. 0 fits it to the mesh's bounds, which come out too small for meshes whose skeleton carries the scale (the packaged frog's bounds read 1 cm, for a 20 cm capsule). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Stylized", meta=(ClampMin="0.0", Units="cm"))
+	float StylizedCapsuleHeight = 0.0f;
+
+	/** Capsule radius for StylizedMesh. 0 derives it from the mesh's bounds. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Stylized", meta=(ClampMin="0.0", Units="cm"))
+	float StylizedCapsuleRadius = 0.0f;
+
 	/** Speed-picked clips played when the mesh has no Animation Blueprint. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Locomotion")
 	TObjectPtr<UAnimSequence> IdleAnimation;

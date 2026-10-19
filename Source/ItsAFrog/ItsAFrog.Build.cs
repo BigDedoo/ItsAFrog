@@ -19,7 +19,8 @@ public class ItsAFrog : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"Slate",
+			"SlateCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -38,7 +39,8 @@ public class ItsAFrog : ModuleRules
 			"ItsAFrog/Variant_SideScrolling/AI",
 			"ItsAFrog/Variant_SideScrolling/Gameplay",
 			"ItsAFrog/Variant_SideScrolling/Interfaces",
-			"ItsAFrog/Variant_SideScrolling/UI"
+			"ItsAFrog/Variant_SideScrolling/UI",
+			"ItsAFrog/FrogLevel"
 		});
 
 		// Uncomment if you are using Slate UI

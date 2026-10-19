@@ -45,5 +45,16 @@ Both builders call `Tools/FrogDemo/ground_materials.py`, which imports the paint
 `AFrogCharacter` options used by the demo:
 
 - **Camera > Diorama**: `bUseDioramaCamera` locks the camera at `DioramaPitch`/`DioramaYaw` and `DioramaArmLength`. Horizontal look input turns it around the frog (`DioramaTurnScale`, 0 locks it). Movement follows the camera's yaw, and the tongue aims where the frog faces. The mouse wheel (or gamepad shoulders) zooms between `DioramaMinArmLength` and `DioramaMaxArmLength`, `DioramaZoomStep` per wheel notch; assign `ZoomAction` to use your own input action, otherwise one is created at runtime.
-- **Character > Stylized**: `StylizedMesh` swaps in a skeletal mesh and fits the capsule to it. Use `StylizedMeshYaw` if the model faces the wrong way (the packaged demo frog needs -90, set from `frog.mesh_yaw` in the layout).
+- **Character > Stylized**: `StylizedMesh` swaps in a skeletal mesh and fits the capsule to it. Use `StylizedMeshYaw` if the model faces the wrong way (the packaged demo frog needs -90, set from `frog.mesh_yaw` in the layout). `StylizedCapsuleHeight` and `StylizedCapsuleRadius` set the capsule directly: the packaged frog's skeleton carries its scale, so fitting to its bounds gives a 20 cm capsule.
 - **Character > Locomotion**: `IdleAnimation`, `WalkAnimation`, `RunAnimation` and `RunSpeedThreshold` play clips by speed when the mesh has no Animation Blueprint.
+
+## Lantern Hill
+
+`Tools/FrogDemo/build_lantern_hill.py` builds `/Game/Stylized/Levels/Lvl_LanternHill`, a short platforming level (a couple of minutes) for the frog. Run it the same way as the other builders, after `build_frog_demo.py`; the layout lives in `Tools/FrogDemo/lantern_hill_layout.json`.
+
+The route: hop the stepping stones across the pond, climb a stump and a stone pillar (the pillar needs a held jump), cross a run of pillars over the water, slip between the thorn bushes, bounce off the red mushroom up to the hill and light the beacon. Ten golden flies are spread along it, some on detours, one only reachable from the top of a mushroom bounce. Two checkpoints catch you when you fall in the water or touch the thorns.
+
+`BP_LanternFrog` is the demo frog with hold-to-jump (`JumpMaxHoldTime` 0.25 s: a tap clears about 1 m, a full hold about 2 m) and a 95 cm capsule. The gameplay pieces are C++ in `Source/ItsAFrog/FrogLevel`:
+
+- `AFrogLevelGameMode` keeps the fly count, the respawn point, the run timer and the finish, and sends the player back to the last checkpoint below `RespawnZ`. `AFrogLevelHUD` draws the counter, timer, title, controls, toasts and finish card on the canvas.
+- `AFrogFlyPickup`, `AFrogCheckpoint`, `AFrogGoal`, `AFrogBouncePad`, `AFrogRespawnVolume` and `AFrogHintVolume` are trigger boxes the builder places and gives meshes from the asset library.
