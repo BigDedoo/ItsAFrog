@@ -2,7 +2,7 @@
 
 The props come straight from Meshy's CDN (links in asset_urls.json, and
 library_urls.json for the basic asset library, which lands in library/); the
-packaged frog (SK_Frog.glb) ships next to this script. Afterwards it cuts the
+packaged frogs (SK_Frog.glb, and SK_FrogQuad.glb with its SK_FrogTongue.glb) ship next to this script. Afterwards it cuts the
 ground bases off the plants (strip_bases.py). Run with any Python 3:
 
     python Tools/FrogDemo/fetch_assets.py
@@ -34,7 +34,8 @@ def main():
     os.makedirs(os.path.join(OUT, "demo"), exist_ok=True)
     fetch("asset_urls.json", OUT)
     fetch("library_urls.json", os.path.join(OUT, "library"))
-    shutil.copyfile(os.path.join(HERE, "SK_Frog.glb"), os.path.join(OUT, "demo", "SK_Frog.glb"))
+    for name in ("SK_Frog.glb", "SK_FrogQuad.glb", "SK_FrogTongue.glb"):
+        shutil.copyfile(os.path.join(HERE, name), os.path.join(OUT, "demo", name))
     print("cutting the ground bases off the plants")
     strip_bases.main(OUT)
     print("assets ready in", os.path.abspath(OUT))

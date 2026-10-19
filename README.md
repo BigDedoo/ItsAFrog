@@ -54,7 +54,17 @@ Both builders call `Tools/FrogDemo/ground_materials.py`, which imports the paint
 
 The route: hop the stepping stones across the pond, climb a stump and a stone pillar (the pillar needs a held jump), cross a run of pillars over the water, slip between the thorn bushes, bounce off the red mushroom up to the hill and light the beacon. Ten golden flies are spread along it, some on detours, one only reachable from the top of a mushroom bounce. Two checkpoints catch you when you fall in the water or touch the thorns.
 
-`BP_LanternFrog` is the demo frog with a lower hold-to-jump (`JumpZVelocity` 330, `JumpMaxHoldTime` 0.25 s: a tap clears about 0.8 m, a full hold about 1.4 m) and a 95 cm capsule. The gameplay pieces are C++ in `Source/ItsAFrog/FrogLevel`:
+`BP_LanternFrog` is the demo frog with a lower hold-to-jump (`JumpZVelocity` 330, `JumpMaxHoldTime` 0.25 s: a tap clears about 0.8 m, a full hold about 1.4 m), the four-legged frog and its tongue (below). The gameplay pieces are C++ in `Source/ItsAFrog/FrogLevel`:
 
 - `AFrogLevelGameMode` keeps the fly count, the respawn point, the run timer and the finish, and sends the player back to the last checkpoint below `RespawnZ`. `AFrogLevelHUD` draws the counter, timer, title, controls, toasts and finish card on the canvas.
 - `AFrogFlyPickup`, `AFrogCheckpoint`, `AFrogGoal`, `AFrogBouncePad`, `AFrogRespawnVolume` and `AFrogHintVolume` are trigger boxes the builder places and gives meshes from the asset library.
+
+### Four-legged frog and tongue
+
+`Tools/FrogDemo/build_frog_quad.py` (run after `build_lantern_hill.py`) swaps the chubby four-legged frog into `BP_LanternFrog` and gives it a working tongue:
+
+- `SK_FrogQuad.glb` (0.75 m tall, 1 m long; `Idle`, `Walk`, `Run` and a `TongueSocket` bone at the mouth) imports to `/Game/Stylized/FrogQuad/Body` and becomes the frog's `StylizedMesh` and clips, with a capsule 75 cm tall and 34 cm in radius (`frog_capsule` in the layout).
+- `SK_FrogTongue.glb` (a 30 cm chain `Bone_000` > `Bone_002` ... `Bone_009` > `Bone_001`) imports to `/Game/Stylized/FrogQuad/Tongue` and goes on the frog's `TongueMesh` with `ABP_FrogQuadTongue`: a `UTongueAnimInstance` Anim Blueprint whose Spline IK runs from `Bone_000` to `Bone_001` (bone axis Z, auto-calculated spline, full stretch) with one Control Point per bone read from `SplineTransforms`.
+- `IA_Tongue` is mapped in `IMC_Default` to the left mouse button, E and the gamepad right trigger, and set as the frog's `TongueAction`. The tongue shoots where the frog faces, up to `MaximumTongueLength` (5 m).
+
+Python can't add Anim Graph nodes, so the first build copies an Anim Blueprint that already has the Spline IK graph (`FROG_TONGUE_ABP_TEMPLATE`, by default `/Game/Characters/Frog_v9/Tongue/ABP_FrogTongue_v9` from the frog-v9 branch) and retargets it to the new tongue. `ABP_FrogQuadTongue` is committed, so later builds only reapply its settings.

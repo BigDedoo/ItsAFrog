@@ -1,11 +1,11 @@
 {
-  "_doc": "Lantern Hill: a short platforming level. Unreal axes in metres: x away from the camera, y along the course (screen right), z up; yaw in degrees. Islands are grass-topped earth drums standing in the pond (top = walkable height). Props are scaled to 'height' or 'width'; give both to stretch a prop (wider stumps, taller pillars). 'z' is the prop's base. Flies are placed by their centre. Frog: 1 m tall, tap jump clears about 0.8 m, holding jump about 1.4 m, a running jump carries about 4 m.",
+  "_doc": "Lantern Hill: a short platforming level. Unreal axes in metres: x away from the camera, y along the course (screen right), z up; yaw in degrees. Islands are grass-topped earth drums standing in the pond (top = walkable height). Props are scaled to 'height' or 'width'; give both to stretch a prop (wider stumps, taller pillars). 'z' is the prop's base. Flies are placed by their centre. Frog: 0.75 m tall and 1 m long on all fours, tap jump clears about 0.8 m, holding jump about 1.4 m, a running jump carries about 4 m.",
   "title": "Lantern Hill",
   "subtitle": "Hop across the pond, catch the golden flies and light the beacon on the hill",
   "camera": {"pitch": -38, "yaw": 0, "min_pitch": -75, "max_pitch": -10, "arm_length_m": 16, "min_arm_length_m": 7, "max_arm_length_m": 30, "fov": 35},
   "jump_z_velocity": 330,
   "jump_max_hold_time": 0.25,
-  "frog_capsule": {"height": 0.95, "radius": 0.25},
+  "frog_capsule": {"height": 0.75, "radius": 0.34},
   "respawn_z": -0.6,
   "ground_tint": [0.5, 0.5, 0.55],
   "player_start": {"x": 0.0, "y": -3.6, "z": 0.4, "yaw": 90},
