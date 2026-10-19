@@ -156,8 +156,8 @@ void AFrogCharacter::ApplyStylizedMesh()
 	const FBoxSphereBounds Bounds = StylizedMesh->GetBounds();
 	const float MeshHeight = static_cast<float>(Bounds.Origin.Z + Bounds.BoxExtent.Z);
 	const float MeshHalfWidth = static_cast<float>(FMath::Min(Bounds.BoxExtent.X, Bounds.BoxExtent.Y));
-	const float HalfHeight = FMath::Max(MeshHeight, 20.0f) * 0.5f;
-	const float Radius = FMath::Clamp(MeshHalfWidth * 0.8f, 10.0f, HalfHeight);
+	const float HalfHeight = FMath::Max(StylizedCapsuleHeight > 0.0f ? StylizedCapsuleHeight : MeshHeight, 20.0f) * 0.5f;
+	const float Radius = FMath::Clamp(StylizedCapsuleRadius > 0.0f ? StylizedCapsuleRadius : MeshHalfWidth * 0.8f, 10.0f, HalfHeight);
 	GetCapsuleComponent()->SetCapsuleSize(Radius, HalfHeight);
 	MeshComponent->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -HalfHeight), FRotator(0.0f, StylizedMeshYaw, 0.0f));
 }
