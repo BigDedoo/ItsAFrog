@@ -22,6 +22,7 @@ BASE_CUTS = {
     "mushroom.glb": 0.112,
     "library/grass_tuft.glb": 0.115,
     "library/fern.glb": 0.19,
+    "library/sakura_b.glb": 0.02,
 }
 
 COMPONENT = {5126: ("f", 4), 5125: ("I", 4), 5123: ("H", 2), 5121: ("B", 1)}

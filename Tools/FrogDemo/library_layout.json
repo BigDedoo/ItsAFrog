@@ -24,6 +24,8 @@
     {"asset": "bench", "width": 1.6},
     {"asset": "torch_post", "height": 2.2, "light": 0.9},
     {"asset": "checkpoint_flag", "height": 2.4},
-    {"asset": "golden_fly", "height": 0.35, "yaw": 90, "z": 0.8, "collision": false, "collectible": true}
+    {"asset": "golden_fly", "height": 0.35, "yaw": 90, "z": 0.8, "collision": false, "collectible": true},
+    {"asset": "sakura_a", "height": 5.0},
+    {"asset": "sakura_b", "height": 4.5}
   ]
 }

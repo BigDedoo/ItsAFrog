@@ -145,7 +145,9 @@
     {"asset": "autumn_tree", "x": 12.0, "y": 88.0, "z": 4.5, "yaw": 0, "height": 6.5},
     {"asset": "reeds", "x": -7.8, "y": 70.2, "z": 0.2, "yaw": 30, "height": 1.2, "collision": false},
     {"asset": "lily_pad", "x": -4.6, "y": 64.0, "z": 0.0, "yaw": 0, "width": 1.6, "collision": false},
-    {"asset": "lily_pad", "x": -3.6, "y": 30.0, "z": 0.0, "yaw": 0, "width": 1.3, "collision": false}
+    {"asset": "lily_pad", "x": -3.6, "y": 30.0, "z": 0.0, "yaw": 0, "width": 1.3, "collision": false},
+    {"asset": "sakura_a", "x": 3.4, "y": 1.4, "z": 0.4, "yaw": 20, "height": 5.0},
+    {"asset": "sakura_b", "x": 12.0, "y": 38.6, "z": 1.5, "yaw": 0, "height": 4.5}
   ],
 
   "flies": [
