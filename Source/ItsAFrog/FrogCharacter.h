@@ -145,7 +145,7 @@ public:
 
 	/** Reverses horizontal look input on the diorama camera (the direction it turns around the frog). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera"))
-	bool bInvertDioramaTurn = true;
+	bool bInvertDioramaTurn = false;
 
 	/** Reverses vertical look input on the diorama camera (the direction it tilts between top-down and the horizon). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera"))
