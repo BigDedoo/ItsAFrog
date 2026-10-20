@@ -313,11 +313,14 @@ void AFrogCharacter::DoLook(float Yaw, float Pitch)
 	{
 		if (CameraBoom)
 		{
-			// Same sense as the orbit camera's AddControllerPitchInput: positive tilts towards the horizon.
+			// Uninverted this matches the orbit camera's AddControllerPitchInput (positive tilts towards the
+			// horizon); bInvertDioramaTurn / bInvertDioramaTilt reverse each axis.
 			const float Steepest = FMath::Min(DioramaMinPitch, DioramaMaxPitch);
 			const float Flattest = FMath::Max(DioramaMinPitch, DioramaMaxPitch);
-			DioramaYaw = FMath::UnwindDegrees(DioramaYaw + Yaw * DioramaTurnScale);
-			DioramaPitch = FMath::Clamp(DioramaPitch + Pitch * DioramaTiltScale, Steepest, Flattest);
+			const float TurnSign = bInvertDioramaTurn ? -1.0f : 1.0f;
+			const float TiltSign = bInvertDioramaTilt ? -1.0f : 1.0f;
+			DioramaYaw = FMath::UnwindDegrees(DioramaYaw + Yaw * TurnSign * DioramaTurnScale);
+			DioramaPitch = FMath::Clamp(DioramaPitch + Pitch * TiltSign * DioramaTiltScale, Steepest, Flattest);
 			CameraBoom->SetWorldRotation(FRotator(DioramaPitch, DioramaYaw, 0.0f));
 		}
 		return;

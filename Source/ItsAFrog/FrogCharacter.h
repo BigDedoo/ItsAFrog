@@ -143,6 +143,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="0.0"))
 	float DioramaTiltScale = 1.0f;
 
+	/** Reverses horizontal look input on the diorama camera (the direction it turns around the frog). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera"))
+	bool bInvertDioramaTurn = true;
+
+	/** Reverses vertical look input on the diorama camera (the direction it tilts between top-down and the horizon). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera"))
+	bool bInvertDioramaTilt = true;
+
 	/** Steepest (most top-down) and flattest tilt the look input can give the diorama camera. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera|Diorama", meta=(EditCondition="bUseDioramaCamera", ClampMin="-89.0", ClampMax="-5.0", Units="deg"))
 	float DioramaMinPitch = -75.0f;
