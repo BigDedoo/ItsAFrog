@@ -187,6 +187,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Locomotion", meta=(ClampMin="0.0", Units="cm/s"))
 	float RunSpeedThreshold = 350.0f;
 
+	/** Jump still works this long after walking off a ledge. 0 turns it off. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Jump", meta=(ClampMin="0.0", Units="s"))
+	float CoyoteTime = 0.12f;
+
+	/** A jump pressed this long before landing goes off as the frog lands. 0 turns it off. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Jump", meta=(ClampMin="0.0", Units="s"))
+	float JumpBufferTime = 0.15f;
+
 protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -221,6 +229,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void NotifyControllerChanged() override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
+	virtual void OnJumped_Implementation() override;
 
 	/** Zooms the diorama camera in (positive) or out (negative), in mouse-wheel notches. */
 	UFUNCTION(BlueprintCallable, Category="Input")
@@ -236,6 +246,14 @@ protected:
 	void TickLocomotion();
 	FRotator GetMovementBasis() const;
 	void EnsureZoomInput();
+	virtual bool CanJumpWhileFalling() const override;
+
+	float LastGroundedTime = -1.0f;
+	/** When an unanswered jump press happened, for JumpBufferTime; negative when there is none. */
+	float BufferedJumpTime = -1.0f;
+	bool bJumpHeld = false;
+	/** A buffered jump fired after the button was let go: end it as a tap once it has started. */
+	bool bReleaseBufferedJump = false;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimSequence> CurrentLocomotionAnimation;

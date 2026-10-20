@@ -59,9 +59,13 @@ AFrogCharacter::AFrogCharacter()
 	bUseControllerRotationRoll = false;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 500.f;
-	GetCharacterMovement()->AirControl = 0.35f;
+	// Steerable in the air: most of the ground acceleration, boosted while slow so a hop can change direction.
+	// The top speed (and so jump distance) is unchanged.
+	GetCharacterMovement()->AirControl = 0.8f;
+	GetCharacterMovement()->AirControlBoostMultiplier = 2.0f;
+	GetCharacterMovement()->AirControlBoostVelocityThreshold = 150.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
@@ -116,6 +120,16 @@ void AFrogCharacter::Tick(float DeltaTime)
 	}
 	TickLocomotion();
 	TickTongue(DeltaTime);
+
+	if (GetCharacterMovement() && GetCharacterMovement()->IsMovingOnGround())
+	{
+		LastGroundedTime = GetWorld()->GetTimeSeconds();
+	}
+	if (bReleaseBufferedJump && (bWasJumping || !bPressedJump))
+	{
+		bReleaseBufferedJump = false;
+		StopJumping();
+	}
 }
 
 void AFrogCharacter::ApplyCameraMode()
@@ -335,12 +349,44 @@ void AFrogCharacter::DoLook(float Yaw, float Pitch)
 
 void AFrogCharacter::DoJumpStart()
 {
+	bJumpHeld = true;
+	BufferedJumpTime = GetWorld()->GetTimeSeconds();  // cleared by OnJumped if this press jumps
 	Jump();
 }
 
 void AFrogCharacter::DoJumpEnd()
 {
+	bJumpHeld = false;
 	StopJumping();
+}
+
+bool AFrogCharacter::CanJumpWhileFalling() const
+{
+	// Coyote time: the engine only asks this before the first jump, i.e. after walking off a ledge (not while
+	// a bounce pad is still throwing the frog up).
+	const UCharacterMovementComponent* Movement = GetCharacterMovement();
+	return CoyoteTime > 0.0f && LastGroundedTime >= 0.0f && Movement && Movement->Velocity.Z <= 0.0
+		&& GetWorld()->GetTimeSeconds() - LastGroundedTime <= CoyoteTime;
+}
+
+void AFrogCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+	BufferedJumpTime = -1.0f;
+}
+
+void AFrogCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	// Landing resets the jump state, which drops a press made just before touching down; replay it.
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+	const bool bBuffered = BufferedJumpTime >= 0.0f && GetWorld()->GetTimeSeconds() - BufferedJumpTime <= JumpBufferTime;
+	if (bBuffered && GetCharacterMovement() && GetCharacterMovement()->IsMovingOnGround())
+	{
+		BufferedJumpTime = -1.0f;
+		Jump();
+		bReleaseBufferedJump = !bJumpHeld;
+	}
 }
 
 void AFrogCharacter::HandleTongueStarted()

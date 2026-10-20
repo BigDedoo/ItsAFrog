@@ -9,7 +9,7 @@ Unreal Engine 5.8 third-person project featuring a controllable frog character.
 - Third-person spring-arm and follow camera
 - Enhanced Input movement relative to camera yaw
 - Mouse/gamepad look
-- Press-and-hold jump behavior
+- Press-and-hold jump behavior, steerable in the air (`AirControl` 0.8), with `CoyoteTime` (0.12 s after walking off a ledge) and `JumpBufferTime` (a press up to 0.15 s before landing still jumps)
 
 The class uses the existing input assets in `Content/Input/Actions` and is built as part of the `ItsAFrogEditor` target.
 
